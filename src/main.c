@@ -4,17 +4,21 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <errno.h>
+#include <unistd.h>
 
-int main(){
+int main(void){
 
   char* MYPORT="19008";//Randomly chosen unassigned port
   int BACKLOG=5;
   struct addrinfo hints,          //address family socket type 
                   *res,           //Output for getaddrinfo
                   *p;             //Pointer for traversing res
+ struct sockaddr_storage clientaddr;
   int status;                     //getaddrinfo() status
-  int sockfd;                    //Socket descriptor
-  
+  int sockfd, clientsockfd;       //Socket descriptor
+  socklen_t addrsize;
+  char* msg="Hullooo";
+
   memset(&hints,0,sizeof hints);
     
   hints.ai_family=AF_UNSPEC;      //Maximum compatibility
@@ -39,5 +43,17 @@ int main(){
   }
   bind(sockfd,res->ai_addr,res->ai_addrlen);
   listen(sockfd,BACKLOG);
+  
+  addrsize=sizeof clientaddr;
+  clientsockfd=accept(sockfd,(struct sockaddr *)&clientaddr, &addrsize);
+  if(clientsockfd==-1){
+    printf("Accept Error: %s\n",strerror(errno));
+  }
+
+  //Sending test message
+  send(clientsockfd,msg,strlen(msg),0);
+
+  close(clientsockfd);
+  close(sockfd);
   return 0;
 }
