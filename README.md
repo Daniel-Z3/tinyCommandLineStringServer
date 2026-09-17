@@ -1,4 +1,4 @@
-# tinyBirdImageServer
+# tinyCommandLineStringServer
 Localhost toy server that sends 1024 character command line argument string.
 Built as an exercise on very basics of network programming.
 
