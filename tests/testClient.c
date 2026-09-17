@@ -9,13 +9,16 @@
 #include <arpa/inet.h>
 
 int main(void){
-  void* buf;//Char buf to be cast
   char* SERVER_PORT="19008";
+  int MSG_LEN=1024; 
+
+  char buf[MSG_LEN];//Char buf to be cast
   struct addrinfo hints,*p,*res;
   int status;
   int sockfd;
+  char svrIPstr[INET_ADDRSTRLEN];
+  
   memset(&hints,0,sizeof hints);
-
 
   hints.ai_family=AF_INET;
   hints.ai_socktype=SOCK_STREAM;
@@ -35,15 +38,17 @@ int main(void){
     printf("connect Error: %s\n",strerror(errno));
     return 1;
   }
-  char svrIPstr[INET_ADDRSTRLEN];
   inet_ntop(res->ai_family,&(((struct sockaddr_in *)res->ai_addr)->sin_addr),svrIPstr, sizeof svrIPstr);
   printf("Connected to server on %s\n", svrIPstr);
    
-  int recstatus=recv(sockfd,buf,7,0);
+  int recstatus=recv(sockfd,buf,MSG_LEN,0);
   if(recstatus==-1){
     printf("recv Error: %s\n", strerror(errno));
     return 1;
   }
+  printf("Message recieved\n");
+  
+  
   printf("Recieved message: %s\n", buf);
  
   close(sockfd);
