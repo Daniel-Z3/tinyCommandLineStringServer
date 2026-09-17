@@ -16,7 +16,7 @@ int main(void){
  struct sockaddr_storage clientaddr;
   int status;                     //getaddrinfo() status
   int sockfd, clientsockfd;       //Socket descriptor
-  socklen_t addrsize;
+  socklen_t claddrsize;
   char* msg="Hullooo";
 
   memset(&hints,0,sizeof hints);
@@ -39,20 +39,37 @@ int main(void){
   if(sockfd==-1){
     //Add error logging
     printf("socket Error: %s\n", strerror(errno));
-    return 2;
+    return 1;
   }
-  bind(sockfd,res->ai_addr,res->ai_addrlen);
-  listen(sockfd,BACKLOG);
   
-  addrsize=sizeof clientaddr;
-  clientsockfd=accept(sockfd,(struct sockaddr *)&clientaddr, &addrsize);
-  if(clientsockfd==-1){
-    printf("Accept Error: %s\n",strerror(errno));
+  status=bind(sockfd,res->ai_addr,res->ai_addrlen);
+  if(status==-1){
+    printf("bind error: %s\n",strerror(errno));
+    return 1;
   }
+  status=listen(sockfd,BACKLOG);
+  if(status==-1){
+    printf("listen Error: %s\n",strerror(errno));
+    return 1;
+  }
+  
 
+  printf("Listening on port: %s\n",MYPORT);
+
+  claddrsize=sizeof clientaddr;
+  clientsockfd=accept(sockfd,(struct sockaddr *)&clientaddr, &claddrsize);
+  if(clientsockfd==-1){
+    printf("accept Error: %s\n",strerror(errno));
+      close(clientsockfd);
+      close(sockfd);
+    return 1;
+  }
+  
   //Sending test message
-  send(clientsockfd,msg,strlen(msg),0);
-
+  status=send(clientsockfd,msg,7,0);
+  if(status==-1){
+    printf("Failed to send: %s\n",strerror(errno));
+  }
   close(clientsockfd);
   close(sockfd);
   return 0;
